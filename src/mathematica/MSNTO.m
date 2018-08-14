@@ -304,6 +304,9 @@ doAPoint[thePoint_?VectorQ,{}]:=0
 
 
 
+maxACluster[rhoVal_?NumberQ,remaining_?MatrixQ]:=
+FixedPoint[growCluster,{{},rhoVal,remaining}]
+
 
 maxACluster[rhoVal_?NumberQ,{}]:={}
 
