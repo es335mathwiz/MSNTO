@@ -296,6 +296,21 @@ doAPoint[thePoint_?VectorQ,{}]:=0
 
 
 
+maxACluster[rhoVal_?NumberQ,{}]:={}
+
+
+getAllClusters[rhoVal_?NumberQ,remaining_?MatrixQ,
+{lowerUpper:{{_?NumberQ,_?NumberQ}..},discreteVals:{{_Integer..}...}}]:=
+	With[{ndRange=Range[Length[lowerUpper]]},
+With[{
+theRes=
+NestWhileList[maxACluster[rhoVal,#[[-1]]]&,{remaining[[All,ndRange]]},(#[[-1]]=!={})&]},
+     Print["gac1:theRes:",{theRes,ndRange,First /@ Drop[theRes,1],rhoVal,lowerUpper}];
+     With[{nextLowerUppers=expandSingletons[#[[All,ndRange]],rhoVal,lowerUpper]&/@(
+	First /@ Drop[theRes,1])},Print["gac2:",{rhoVal,remaining,lowerUpper,theRes,nextLowerUppers,discreteVals,{#[[ndRange]],discreteVals}&/@nextLowerUppers}];
+				  {#,discreteVals}&/@nextLowerUppers]]]
+
+
 
 
 End[]
