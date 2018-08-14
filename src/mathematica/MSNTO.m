@@ -276,6 +276,17 @@ catchInternalError[code_, f_, failTag_] :=
       Message[General::interr , Style[f, Red], Style[First@tag, Red]];
       value]]; 
 
+dispersion[theMat_?MatrixQ]:=
+With[{theMinNorms=doAPoint[#,theMat]&/@Range[Length[theMat]]},
+Max[theMinNorms]]
+(*
+dispersion[theMat_?MatrixQ]:=
+With[{thptNow=First[theMat],restOfMat=Rest[theMat]},
+With[{minNow=doAPoint[ptNow,restOfMat]},
+Max[minNow,dispersion[restOfMat]]]]
+*)
+dispersion[{}]:=0
+
 
 
 
