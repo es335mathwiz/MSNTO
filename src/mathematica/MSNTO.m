@@ -56,6 +56,10 @@ Flatten[tackOnOneNonD[#,DPts]&/@nonDPts,1]
 tackOnOneNonD[aNonDPt_?VectorQ,DPts:{_?VectorQ..}]:=
 Join[aNonDPt,#]&/@DPts                    
 
+prepDiscrete[{}]:={}
+prepDiscrete[discreteVals:{{_Integer..}..}]:=
+    With[{pre=Outer[List,Sequence @@discreteVals]},Flatten[pre,Depth[pre]-3]]
+
 
                     
 MSNTO[myFunc_,
