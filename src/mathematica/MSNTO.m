@@ -13,6 +13,10 @@ MSNTO::usage="MSNTO[theFunc_,lowerUpper:{{_?NumberQ,_?NumberQ}..},numPts_Integer
 iterMSNTOFunc::usage="iterMSNTOFunc[theFunc_,numPts_Integer,netGen_Symbol,beta_?NumberQ,rhoValMult_?NumberQ,cntrctnFactor_?NumberQ]"
 
 
+Nied::usage="Nied[x_, y_]"
+Sobol::usage="Sobol[x_, y_]"
+SuiteTore::usage="SuiteTore[x_, y_, z_]"
+RandSuiteTore::usage="RandSuiteTore[x_, y_]"
 Begin["`Private`"]
 
 MSNTOMinimizer[{maxWidth_?NumberQ,thePts_?MatrixQ,clustPts:{{_?MatrixQ,{}}..},abl_?aBestListQ,rb:{{_?aRangeSpecQ,_?aBestQ}..}}]:=
