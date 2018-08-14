@@ -93,6 +93,15 @@ contractBounds[#1[[1]],aCluster,cntrctnFactor,#2],#}&,{bestVals,clusters}]},
 sortByClusterBest[bestVals,newBounds]}]]]]]]]]]]
 
 
+thisClusterBest[aCluster:{{_?VectorQ..},_},keepPts_?MatrixQ,keepFVals_?VectorQ,
+previousBest:{_?VectorQ,previousFVal:(_?NumberQ|Infinity)}]:=
+With[{theLoc=Min[Flatten[Position[keepPts,#]&/@aCluster[[1]]][[1]]]},
+If[previousFVal<=keepFVals[[theLoc]],previousBest,
+{keepPts[[1]],keepFVals[[1]]},previousBest]]
+
+
+
+
 bestResNest[{__,{_,_,_,bVals:{{_?VectorQ,_?NumberQ}..},_}}]:=
 With[{theOrds=Ordering[Last/@bVals,1]},{theOrds,bVals,bVals[[theOrds,1]][[1]]}]
 
