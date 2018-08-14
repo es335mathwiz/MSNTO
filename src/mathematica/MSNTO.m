@@ -288,6 +288,12 @@ Max[minNow,dispersion[restOfMat]]]]
 dispersion[{}]:=0
 
 
+doAPoint[idx_Integer,theMat_?MatrixQ]:=
+Min[Norm[theMat[[idx]]-#]&/@Drop[theMat,{idx}]]
+
+doAPoint[thePoint_?VectorQ,{}]:=0
+
+
 
 
 
