@@ -99,7 +99,13 @@ With[{theLoc=Min[Flatten[Position[keepPts,#]&/@aCluster[[1]]][[1]]]},
 If[previousFVal<=keepFVals[[theLoc]],previousBest,
 {keepPts[[1]],keepFVals[[1]]},previousBest]]
 
+contractBounds[bestX_?VectorQ,bounds:{{{_?NumberQ,_?NumberQ}..},discreteVals:{{_Integer..}...}},
+cntrctnFactor_?NumberQ,{points:{_?VectorQ..},{}}]:=
+With[{tPoints=Transpose[points]},
+With[{mins=Min/@ tPoints,maxs=Max/@tPoints},
+chkX[points,bestX,bounds,cntrctnFactor]]]
 
+$minWidth=10^-8;
 
 
 bestResNest[{__,{_,_,_,bVals:{{_?VectorQ,_?NumberQ}..},_}}]:=
@@ -297,10 +303,80 @@ Max[minNow,dispersion[restOfMat]]]]
 dispersion[{}]:=0
 
 
+seperateLowerUpper[{left_?NumberQ,right_?NumberQ}]:=
+If[right-left>=$minWidth,{left,right},((left+right)/2)+({-1,1}*($minWidth/2))]
+
+
+chkX[theXs_?MatrixQ,bestX_?VectorQ,bounds:{{{_?NumberQ,_?NumberQ}...},{}},
+cntrctnFactor_?NumberQ]:=
+With[{tPoints=Transpose[theXs]},
+With[{theMins=Min/@tPoints,theMaxs=Max/@tPoints},
+With[{hWidths=(theMaxs-theMins)/2},
+With[{tryUpperLower=seperateLowerUpper/@
+Transpose[{
+MapThread[
+chooseLower[#1,#2,#3,cntrctnFactor]&,{bestX,hWidths,theMins}],
+MapThread[
+chooseUpper[#1,#2,#3,cntrctnFactor]&,{bestX,hWidths,theMaxs}]}]},
+{tryUpperLower,{}}
+]]]]
+
+chooseLower[bestXk_?NumberQ,hWidthK_?NumberQ,minK_?NumberQ,shrink_?NumberQ]:=
+Max[bestXk-shrink*hWidthK,minK]
+
+chooseUpper[bestXk_?NumberQ,hWidthK_?NumberQ,maxK_?NumberQ,shrink_?NumberQ]:=
+Min[bestXk+shrink*hWidthK,maxK]
+
+
+
 doAPoint[idx_Integer,theMat_?MatrixQ]:=
 Min[Norm[theMat[[idx]]-#]&/@Drop[theMat,{idx}]]
 
 doAPoint[thePoint_?VectorQ,{}]:=0
+
+
+inRhoNgh[seed_?VectorQ,rhoVal_?NumberQ,theRest_?MatrixQ]:=
+{Select[theRest,Norm[seed-#]<=rhoVal&],Select[theRest,Norm[seed-#]>rhoVal&]}
+
+inRhoNgh[seed_?VectorQ,rhoVal_?NumberQ,{}]:=
+{{},{}}
+
+
+expandSingletons[xx_,aDisp_?NumberQ,lowerUpper:{{_?NumberQ,_?NumberQ}..}]:=
+Module[{},Print["expandNothing",xx];xx]
+
+
+expandSingletons[thePts:{_?VectorQ..},aDisp_?NumberQ,
+lowerUpper:{{_?NumberQ,_?NumberQ}..}]:=
+Module[{},
+Print["es:",{thePts,lowerUpper,aDisp}];
+Map[expandSingletons[#1,aDisp,lowerUpper]&,thePts]]
+
+expandSingletons[{thePt_?VectorQ},aDisp_?NumberQ,
+lowerUpper:{{_?NumberQ,_?NumberQ}..}]:=
+With[{tups=Tuples[{aDisp,-aDisp},Length[thePt]]},
+With[{tooWide=Append[thePt+#&/@tups,thePt]},
+Map[trimOutliers[#,lowerUpper]&,tooWide]]]
+
+trimOutliers[aVec:{_?NumberQ..},
+lowerUpper:{{_?NumberQ,_?NumberQ}..}]:=
+	Module[{},Print["trimOut:",{aVec,lowerUpper}];
+MapThread[Which[#1<#2[[1]],#2[[1]],#1>#2[[2]],#2[[2]],True,#1]&,
+	       {aVec,lowerUpper}]]
+
+
+growCluster[{{},rhoVal_?NumberQ,remaining_?MatrixQ}]:=
+With[{theRes=inRhoNgh[remaining[[1]],rhoVal,Rest[remaining]]},
+{Prepend[theRes[[1]],remaining[[1]]],rhoVal,theRes[[2]]}]
+
+
+growCluster[{clusterNow_List,rhoVal_?NumberQ,remaining_?MatrixQ}]:=
+With[{theRes=inRhoNgh[#,rhoVal,remaining]&/@clusterNow},
+With[{adds=First/@Union[DeleteCases[theRes,{{},___}]]},
+{Join[clusterNow,Union[Join @@ adds]],rhoVal,Complement[remaining,Union[Join @@ adds]]}]]
+
+
+growCluster[{clusterNow_List,rhoVal_?NumberQ,{}}]:={clusterNow,rhoVal,{}}
 
 
 
@@ -316,7 +392,7 @@ getAllClusters[rhoVal_?NumberQ,remaining_?MatrixQ,
 	With[{ndRange=Range[Length[lowerUpper]]},
 With[{
 theRes=
-NestWhileList[maxACluster[rhoVal,#[[-1]]]&,{remaining[[All,ndRange]]},(#[[-1]]=!={})&]},
+NestWhileList[(Print[{"innestwhile:",#,maxACluster[rhoVal[#[[-1]]]]}];maxACluster[rhoVal,#[[-1]]])&,{remaining[[All,ndRange]]},(#[[-1]]=!={})&]},
      Print["gac1:theRes:",{theRes,ndRange,First /@ Drop[theRes,1],rhoVal,lowerUpper}];
      With[{nextLowerUppers=expandSingletons[#[[All,ndRange]],rhoVal,lowerUpper]&/@(
 	First /@ Drop[theRes,1])},Print["gac2:",{rhoVal,remaining,lowerUpper,theRes,nextLowerUppers,discreteVals,{#[[ndRange]],discreteVals}&/@nextLowerUppers}];
