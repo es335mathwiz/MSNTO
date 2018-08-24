@@ -12,7 +12,7 @@ MSNTOMinimizer::usage="MSNTOMinimizer[{maxWidth_?NumberQ,thePts_?MatrixQ,clustPt
 MSNTO::usage="MSNTO[theFunc_,lowerUpper:{{_?NumberQ,_?NumberQ}..},numPts_Integer,netGen_Symbol,beta_?NumberQ,rhoValMult_?NumberQ,cntrctnFactor_?NumberQ]"
 iterMSNTOFunc::usage="iterMSNTOFunc[theFunc_,numPts_Integer,netGen_Symbol,beta_?NumberQ,rhoValMult_?NumberQ,cntrctnFactor_?NumberQ]"
 
-
+unitToActual::usage
 Nied::usage="Nied[x_, y_]"
 Sobol::usage="Sobol[x_, y_]"
 SuiteTore::usage="SuiteTore[x_, y_, z_]"
